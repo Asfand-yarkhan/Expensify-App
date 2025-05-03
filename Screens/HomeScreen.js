@@ -1,17 +1,19 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList } from 'react-native';
 import Emptylist from '../components/Emptylist';   
+import { useNavigation } from '@react-navigation/native';
 
 const items = [
-  // { id: '1', place: 'Gujrat', country: 'Pakistan' },
-  // { id: '2', place: 'London Eye', country: 'England' },
-  // { id: '3', place: 'Washington DC', country: 'America' },
-  // { id: '4', place: 'New York', country: 'America' },
-  // { id: '5', place: 'Thailand', country: 'America' },
-  // { id: '6', place: 'Hungry', country: 'Europe' },
+  { id: '1', place: 'Gujrat', country: 'Pakistan' },
+  { id: '2', place: 'London Eye', country: 'England' },
+  { id: '3', place: 'Washington DC', country: 'America' },
+  { id: '4', place: 'New York', country: 'America' },
+  { id: '5', place: 'Thailand', country: 'America' },
+  { id: '6', place: 'Hungry', country: 'Europe' },
 ];
 
 const HomeScreen = () => {
+  const navigation = useNavigation();
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -33,7 +35,7 @@ const HomeScreen = () => {
       {/* Recent Trips Header */}
       <View style={styles.tripsHeader}>
         <Text style={styles.heading2}>Recent Trips</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={()=>navigation.navigate('AddTripScreen')}>
           <Text style={styles.buttonText2}>Add Trip</Text>
         </TouchableOpacity>
       </View>
@@ -44,7 +46,7 @@ const HomeScreen = () => {
         data={items}
         numColumns={2}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={<Emptylist/>}        
+        ListEmptyComponent={<Emptylist message={"You have recorded no Trip yet"}/>}        
         columnWrapperStyle={{ justifyContent: 'space-between' }}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (

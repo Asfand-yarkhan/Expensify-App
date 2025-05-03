@@ -1,11 +1,11 @@
 import React from 'react';
 import { StyleSheet, Text, View, Image } from 'react-native';
 
-const Emptylist = (message) => {
+const Emptylist = ({message}) => {
   return (
     <View style={styles.container}>
       <Image style={styles.image} source={require('../assets/empty.jpg')} />
-      <Text style={styles.text}>{message}No trips yet!</Text>
+      <Text style={styles.text}>{message || 'No data Found!'}</Text>
     </View>
   );
 };
