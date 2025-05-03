@@ -1,117 +1,157 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Image } from 'react-native'; 
-import { FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList } from 'react-native';
+import Emptylist from '../components/Emptylist';   
 
 const items = [
-    {
-      id: 1,
-      place: 'Gujrat',
-      country: 'Pakistan',
-    },
-    {
-      id: 2,
-      place: 'London Eye',
-      country: 'England',
-    },
-    {
-      id: 3,
-      place: 'Washington dc',
-      country: 'America',
-    },
-    {
-      id: 4,
-      place: 'New york',
-      country: 'America',
-    }
-  ];
-  
+  // { id: '1', place: 'Gujrat', country: 'Pakistan' },
+  // { id: '2', place: 'London Eye', country: 'England' },
+  // { id: '3', place: 'Washington DC', country: 'America' },
+  // { id: '4', place: 'New York', country: 'America' },
+  // { id: '5', place: 'Thailand', country: 'America' },
+  // { id: '6', place: 'Hungry', country: 'Europe' },
+];
 
 const HomeScreen = () => {
-    return (
-  <View style={styles.container}>
-    <View style={{flexDirection:'row',justifyContent:'space-between'}}>
-   <Text style={styles.heading}>Expensify</Text>
-   <TouchableOpacity>
-    <Text style={styles.buttonText}>Logout</Text>    
-   </TouchableOpacity>
-   </View>
-   <View style={{justifyContent:'center', alignItems:'center', backgroundColor:'skyblue',borderRadius:50, marginTop:10}}>
-    <Image source={require('../assets/travel.jpeg')} style={{width:250,height:250}}></Image>
-   </View>
-   <View style={{flexDirection:'row',justifyContent:'space-between'}}>
-   <Text style={styles.heading2}>Recent Trips</Text>
-   <TouchableOpacity>
-    <Text style={styles.buttonText2}>Add Trip</Text>    
-   </TouchableOpacity>
-   </View>
-   <View>
-    <FlatList
-    data = {items}
-    numColumns={2}
-    showsVerticalScrollIndicator={false}
-columnWrapperStyle={{
-    justifyContent:'space-between',
-}}
-    keyExtractor={item=>item.id}
-    renderItem={({item})=>{
-        return(
-            <TouchableOpacity style={{backgroundColor:'lightgrey',borderRadius:15,margin:15,padding:30}}>
-                <Image source={require('../assets/travel.jpeg')} style={{width:70,height:70}}></Image>
-                <Text>{item.place}</Text>
-                <Text>{item.country}</Text>
-            </TouchableOpacity>
-        )
-    }}
-    ></FlatList>
-   </View>
-  </View>
-);
+  return (
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.heading}>Expensify</Text>
+        <TouchableOpacity>
+          <Text style={styles.buttonText}>Logout</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Main Image */}
+      <View style={styles.imageContainer}>
+        <Image
+          source={require('../assets/travel.jpeg')}
+          style={styles.mainImage}
+        />
+      </View>
+
+      {/* Recent Trips Header */}
+      <View style={styles.tripsHeader}>
+        <Text style={styles.heading2}>Recent Trips</Text>
+        <TouchableOpacity>
+          <Text style={styles.buttonText2}>Add Trip</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Trips List */}
+      <FlatList
+        contentContainerStyle={styles.listContent}
+        data={items}
+        numColumns={2}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={<Emptylist/>}        
+        columnWrapperStyle={{ justifyContent: 'space-between' }}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <TouchableOpacity style={styles.tripCard}>
+            <Image
+              source={require('../assets/travel.jpeg')}
+              style={styles.cardImage}
+            />
+            <Text style={styles.placeText}>{item.place}</Text>
+            <Text style={styles.countryText}>{item.country}</Text>
+          </TouchableOpacity>
+        )}
+      />
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: 'white',
-    },
-    heading:{
-        fontSize: 26,
-        fontWeight: 'bold',
-        fontFamily:'Times New Roman',
-        color: 'black',
-        marginLeft:10,
-        marginTop:20
-    },
-    buttonText:{
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: 'black',
-        padding:10,
-        borderRadius:20,
-        borderWidth:1,
-        borderColor:'black',
-        marginRight:10,
-        marginTop:20
-    },
-    heading2:{
-        fontSize: 23,
-        fontWeight: 'bold',
-        fontFamily:'Times New Roman',
-        color: 'black',
-        marginLeft:10,
-        marginTop:15
-    },
-    buttonText2:{
-        fontSize: 13,
-        fontWeight: 'bold',
-        color: 'black',
-        padding:10,
-        borderRadius:20,
-        borderWidth:1,
-        borderColor:'black',
-        marginRight:10,
-        marginTop:10
-    },
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
+    paddingHorizontal: 15,
+    paddingTop: 40,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  heading: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    fontFamily: 'Times New Roman',
+    color: 'black',
+  },
+  buttonText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: 'black',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'black',
+  },
+  imageContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'skyblue',
+    borderRadius: 150,
+    marginTop: 20,
+    padding: 20,
+  },
+  mainImage: {
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+  },
+  tripsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 30,
+    marginBottom: 10,
+  },
+  heading2: {
+    fontSize: 23,
+    fontWeight: 'bold',
+    fontFamily: 'Times New Roman',
+    color: 'black',
+  },
+  buttonText2: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: 'black',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'black',
+  },
+  listContent: {
+    paddingBottom: 30,
+  },
+  tripCard: {
+    backgroundColor: 'lightgrey',
+    borderRadius: 15,
+    padding: 15,
+    width: '48%',
+    marginBottom: 15,
+    alignItems: 'center',
+  },
+  cardImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    marginBottom: 10,
+  },
+  placeText: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: 'black',
+  },
+  countryText: {
+    fontSize: 14,
+    color: 'grey',
+  },
 });
 
 export default HomeScreen;
