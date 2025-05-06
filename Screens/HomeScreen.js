@@ -16,7 +16,7 @@ const HomeScreen = () => {
   const navigation = useNavigation();
   return (
     <View style={styles.container}>
-      {/* Header */}
+      
       <View style={styles.header}>
         <Text style={styles.heading}>Expensify</Text>
         <TouchableOpacity>
@@ -24,7 +24,6 @@ const HomeScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Main Image */}
       <View style={styles.imageContainer}>
         <Image
           source={require('../assets/travel.jpeg')}
@@ -32,7 +31,6 @@ const HomeScreen = () => {
         />
       </View>
 
-      {/* Recent Trips Header */}
       <View style={styles.tripsHeader}>
         <Text style={styles.heading2}>Recent Trips</Text>
         <TouchableOpacity onPress={()=>navigation.navigate('AddTripScreen')}>
@@ -40,7 +38,6 @@ const HomeScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Trips List */}
       <FlatList
         contentContainerStyle={styles.listContent}
         data={items}
@@ -50,7 +47,11 @@ const HomeScreen = () => {
         columnWrapperStyle={{ justifyContent: 'space-between' }}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.tripCard}>
+          <TouchableOpacity style={styles.tripCard} onPress={()=>navigation.navigate('TripExpenseScreen', {
+            id: item.id,
+            place: item.place,
+            country: item.country,
+          })}>
             <Image
               source={require('../assets/travel.jpeg')}
               style={styles.cardImage}
@@ -69,7 +70,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     paddingHorizontal: 15,
-    paddingTop: 40,
+    paddingTop: 25,
   },
   header: {
     flexDirection: 'row',
