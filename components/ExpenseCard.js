@@ -1,7 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import {StyleSheet, Text, View} from 'react-native';
+import React from 'react';
 
-const ExpenseCard = ({ item }) => {
+const ExpenseCard = ({item}) => {
   return (
     <View style={styles.container}>
       <View>

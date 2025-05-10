@@ -1,23 +1,29 @@
-import { StyleSheet, Text, View, SafeAreaView , Image, TouchableOpacity } from 'react-native';
-import React, { useState } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  SafeAreaView,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
+import React, {useState} from 'react';
 import Backbutton from '../components/Backbutton';
-import { TextInput } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import {TextInput} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 
 const AddTripScreen = () => {
-  const [place,setplace] = useState('');
-  const [country,setcountry] = useState('');
+  const [place, setplace] = useState('');
+  const [country, setcountry] = useState('');
 
   const navigation = useNavigation();
 
-  const handleAddTrip = () =>{
-    if(place && country)
-    {
+  const handleAddTrip = () => {
+    if (place && country) {
       navigation.navigate('HomeScreen');
-    }else{
+    } else {
       //error message
     }
-  }
+  };
 
   return (
     <SafeAreaView style={styles.container1}>
@@ -25,23 +31,31 @@ const AddTripScreen = () => {
         <Backbutton />
       </View>
 
-      <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{justifyContent: 'center', alignItems: 'center'}}>
         <Text style={styles.heading}>Add Trip</Text>
       </View>
 
-      <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{justifyContent: 'center', alignItems: 'center'}}>
         <Image style={styles.Image} source={require('../assets/empty.jpg')} />
       </View>
 
       <View>
         <Text style={styles.Text}>Where on Earth?</Text>
-        <TextInput value={place} onChangeText={value=>setplace(value)} style={styles.Input} />
+        <TextInput
+          value={place}
+          onChangeText={value => setplace(value)}
+          style={styles.Input}
+        />
         <Text style={styles.Text}>Which Country:</Text>
-        <TextInput value={country} onChangeText={value=>setcountry(value)} style={styles.Input} />
+        <TextInput
+          value={country}
+          onChangeText={value => setcountry(value)}
+          style={styles.Input}
+        />
       </View>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={()=>handleAddTrip()}>
+        <TouchableOpacity style={styles.button} onPress={() => handleAddTrip()}>
           <Text style={styles.buttonText}>Add Trip</Text>
         </TouchableOpacity>
       </View>

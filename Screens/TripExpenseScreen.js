@@ -9,7 +9,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import Emptylist from '../components/Emptylist';
-import {useNavigation,useRoute} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import Backbutton from '../components/Backbutton';
 import ExpenseCard from '../components/ExpenseCard';
 
@@ -34,13 +34,9 @@ const items = [
   },
 ];
 
-const TripExpenseScreen = (props) => {
-  const route = useRoute();
+const TripExpenseScreen = props => {
   const navigation = useNavigation();
-  const { id, place, country } = route.params;
-  //const { id = 0, place = 'Unknown', country = 'Unknown' } = route.params || {};
-
-  
+  const {id, place, country} = props.route.params;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -63,7 +59,11 @@ const TripExpenseScreen = (props) => {
       <View style={styles.tripsHeader}>
         <Text style={styles.heading2}>Expenses</Text>
         <TouchableOpacity>
-          <Text style={styles.buttonText2}>Add Expenses</Text>
+          <Text
+            style={styles.buttonText2}
+            onPress={() => navigation.navigate('AddExpense')}>
+            Add Expenses
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -75,7 +75,7 @@ const TripExpenseScreen = (props) => {
           <Emptylist message={'You have added no Expense yet'} />
         }
         keyExtractor={item => item.id}
-        renderItem={({item}) => <ExpenseCard  item={item}/>}
+        renderItem={({item}) => <ExpenseCard item={item} />}
       />
     </SafeAreaView>
   );
