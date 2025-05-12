@@ -6,21 +6,21 @@ const Welcome = () => {
     const navigation = useNavigation();
   return (
     <View style={styles.container}>
-      <View style={styles.imageContainer}>
-        <Image
-          source={require('../assets/travel.jpeg')}
-          style={styles.image}
-          resizeMode="cover"
-        />
-      </View>
-      <View style={styles.contentContainer}>
-        <Text style={styles.title}>Expensify</Text>
-        <TouchableOpacity style={styles.button} onPress={()=>navigation.navigate('LogIn')}>
-          <Text style={styles.buttonText}>Sign In</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, styles.signUpButton]} onPress={()=>navigation.navigate('LogIn')}>
-          <Text style={styles.buttonText}>Sign Up</Text>
-        </TouchableOpacity>
+      <Image
+        source={require('../assets/welcome.jpg')}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+      />
+      <View style={styles.overlay}>
+        <View style={styles.contentContainer}>
+          <Text style={styles.title}>Expensify</Text>
+          <TouchableOpacity style={styles.button} onPress={()=>navigation.navigate('LogIn')}>
+            <Text style={styles.buttonText}>Sign In</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.signUpButton]} onPress={()=>navigation.navigate('SignUp')}>
+            <Text style={styles.buttonText}>Sign Up</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   )
@@ -31,36 +31,25 @@ export default Welcome
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
   },
-  imageContainer: {
-    height: '50%',
-    width: '100%',
-    marginTop: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  image: {
+  backgroundImage: {
+    position: 'absolute',
     width: '100%',
     height: '100%',
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
   },
   contentContainer: {
-    flex: 1,
     padding: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: 'rgba(255,255,255,0.9)',
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    marginTop: -30,
+    paddingVertical: 40,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

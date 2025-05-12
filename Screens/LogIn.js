@@ -44,6 +44,8 @@ const LogIn = () => {
         <TextInput
           value={email}
           onChangeText={value => setemail(value)}
+          placeholder="Enter your email"
+          placeholderTextColor="#666"
           style={styles.Input}
         />
         <Text style={styles.Text}>Password :</Text>
@@ -51,7 +53,17 @@ const LogIn = () => {
           value={Password}
           onChangeText={value => setPassword(value)}
           style={styles.Input}
+          secureTextEntry={true}
+          placeholder="Enter your password"
+          placeholderTextColor="#666"
+          autoCapitalize="none"
+          autoCorrect={false}
         />
+      </View>
+      <View style={styles.forgetContainer}>
+        <TouchableOpacity onPress={() => navigation.navigate('ForgetPassword')}>
+          <Text style={styles.forgetText}>Forget Password?</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.buttonContainer}>
@@ -122,6 +134,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
+    color: '#000000',
+    fontSize: 16,
   },
   buttonContainer: {
     marginTop: 40,
@@ -147,5 +161,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#ffffff',
     letterSpacing: 1,
+  },
+  forgetContainer: {
+    alignItems: 'flex-end',
+    paddingRight: 10,
+    marginTop: 5,
+  },
+  forgetText: {
+    color: '#3949ab',
+    fontSize: 14,
+    fontWeight: '500',
+    textDecorationLine: 'underline',
   },
 });

@@ -1,36 +1,56 @@
-import { StyleSheet, Text, View } from 'react-native'
-import{NavigationContainer} from '@react-navigation/native'
-import{createNativeStackNavigator} from '@react-navigation/native-stack'
-import React from 'react'
-import HomeScreen from './Screens/HomeScreen' 
-import LogIn from './Screens/LogIn'
-import AddTripScreen from './Screens/AddTripScreen'
-import TripExpenseScreen from './Screens/TripExpenseScreen'
-import AddExpense from './Screens/AddExpense'
-import Welcome from './Screens/Welcome'
-import SignUp from './Screens/SignUp'
+import React from 'react';
+import { Provider } from 'react-redux';
+import { store } from './store/store';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import Welcome from './Screens/Welcome';
+import LogIn from './Screens/LogIn';
+import SignUp from './Screens/SignUp';
+import HomeScreen from './Screens/HomeScreen';
+import AddTripScreen from './Screens/AddTripScreen';
+import TripExpenseScreen from './Screens/TripExpenseScreen';
+import AddExpense from './Screens/AddExpense';
+import { useSelector } from 'react-redux';
 
 const Stack = createNativeStackNavigator();
-const App = () => {
-  console.log('App component rendered');
-  
-  return (
-    <NavigationContainer>
-     <Stack.Navigator initialRouteName='Welcome'>
-     <Stack.Screen name='Welcome' component={Welcome} options={{headerShown:false}} />
-      <Stack.Screen name='HomeScreen' component={HomeScreen} options={{headerShown:false}} />
-      <Stack.Screen name='LogIn' component={LogIn} options={{headerShown:false}} />
-      <Stack.Screen name='SignUp' component={SignUp} options={{headerShown:false}} />
 
-      <Stack.Screen name='AddTripScreen' component={AddTripScreen} options={{headerShown:false}} />
-      <Stack.Screen name='TripExpenseScreen' component={TripExpenseScreen} options={{headerShown:false}} />
-      <Stack.Screen name='AddExpense' component={AddExpense} options={{headerShown:false}} />
-     </Stack.Navigator>
-    </NavigationContainer>
-  )
-}
+const Navigation = () => {
+  const { isAuthenticated } = useSelector((state) => state.auth);
+
+  return (
+    <Stack.Navigator
+      initialRouteName={isAuthenticated ? "HomeScreen" : "Welcome"}
+      screenOptions={{
+        headerShown: false,
+      }}>
+      {!isAuthenticated ? (
+        // Auth Stack
+        <>
+          <Stack.Screen name="Welcome" component={Welcome} />
+          <Stack.Screen name="LogIn" component={LogIn} />
+          <Stack.Screen name="SignUp" component={SignUp} />
+        </>
+      ) : (
+        // App Stack
+        <>
+          <Stack.Screen name="HomeScreen" component={HomeScreen} />
+          <Stack.Screen name="AddTripScreen" component={AddTripScreen} />
+          <Stack.Screen name="TripExpenseScreen" component={TripExpenseScreen} />
+          <Stack.Screen name="AddExpense" component={AddExpense} />
+        </>
+      )}
+    </Stack.Navigator>
+  );
+};
+
+const App = () => {
+  return (
+    <Provider store={store}>
+      <NavigationContainer>
+        <Navigation />
+      </NavigationContainer>
+    </Provider>
+  );
+};
 
 export default App;
-const styles = StyleSheet.create({
-  
-})
