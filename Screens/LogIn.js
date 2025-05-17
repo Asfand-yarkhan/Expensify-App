@@ -5,23 +5,71 @@ import {
   SafeAreaView,
   Image,
   TouchableOpacity,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useState} from 'react';
 import Backbutton from '../components/Backbutton';
 import {TextInput} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import {useDispatch} from 'react-redux';
+import {login} from '../store/slices/authSlice';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 const LogIn = () => {
   const [email, setemail] = useState('');
   const [Password, setPassword] = useState('');
-
+  const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
-  const handleSignin = () => {
-    if (email && Password) {
-      navigation.navigate('HomeScreen');
-    } else {
-      //error message
+  const handleSignin = async () => {
+    if (!email || !Password) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      // Sign in with Firebase
+      const userCredential = await auth().signInWithEmailAndPassword(email, Password);
+      
+      // Get additional user data from Firestore
+      const userDoc = await firestore()
+        .collection('users')
+        .doc(userCredential.user.uid)
+        .get();
+
+      if (!userDoc.exists) {
+        throw new Error('User data not found');
+      }
+
+      const userData = userDoc.data();
+
+      // Update Redux state with user data
+      dispatch(login({
+        uid: userCredential.user.uid,
+        email: userData.email,
+        cnic: userData.cnic,
+        phoneNumber: userData.phoneNumber,
+      }));
+
+      // Navigation will be handled automatically by the App.js conditional rendering
+    } catch (error) {
+      let errorMessage = 'An error occurred during sign in';
+      if (error.code === 'auth/user-not-found') {
+        errorMessage = 'No account found with this email';
+      } else if (error.code === 'auth/wrong-password') {
+        errorMessage = 'Incorrect password';
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Invalid email address';
+      } else if (error.message === 'User data not found') {
+        errorMessage = 'User data not found in database';
+      }
+      Alert.alert('Error', errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -47,6 +95,9 @@ const LogIn = () => {
           placeholder="Enter your email"
           placeholderTextColor="#666"
           style={styles.Input}
+          editable={!loading}
+          autoCapitalize="none"
+          keyboardType="email-address"
         />
         <Text style={styles.Text}>Password :</Text>
         <TextInput
@@ -58,6 +109,7 @@ const LogIn = () => {
           placeholderTextColor="#666"
           autoCapitalize="none"
           autoCorrect={false}
+          editable={!loading}
         />
       </View>
       <View style={styles.forgetContainer}>
@@ -67,8 +119,16 @@ const LogIn = () => {
       </View>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => handleSignin()}>
-          <Text style={styles.buttonText}>Sign In</Text>
+        <TouchableOpacity 
+          style={[styles.button, loading && styles.buttonDisabled]} 
+          onPress={handleSignin}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#ffffff" />
+          ) : (
+            <Text style={styles.buttonText}>Sign In</Text>
+          )}
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -155,6 +215,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4.65,
     elevation: 8,
+  },
+  buttonDisabled: {
+    backgroundColor: '#9fa8da',
   },
   buttonText: {
     fontSize: 18,

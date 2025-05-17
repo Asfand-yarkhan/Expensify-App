@@ -10,14 +10,23 @@ const Welcome = () => {
         source={require('../assets/welcome.jpg')}
         style={styles.backgroundImage}
         resizeMode="cover"
+        onError={(error) => console.log('Image loading error:', error.nativeEvent.error)}
       />
       <View style={styles.overlay}>
         <View style={styles.contentContainer}>
           <Text style={styles.title}>Expensify</Text>
-          <TouchableOpacity style={styles.button} onPress={()=>navigation.navigate('LogIn')}>
+          <TouchableOpacity 
+            style={styles.button} 
+            onPress={() => navigation.navigate('LogIn')}
+            activeOpacity={0.8}
+          >
             <Text style={styles.buttonText}>Sign In</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.signUpButton]} onPress={()=>navigation.navigate('SignUp')}>
+          <TouchableOpacity 
+            style={[styles.button, styles.signUpButton]} 
+            onPress={() => navigation.navigate('SignUp')}
+            activeOpacity={0.8}
+          >
             <Text style={styles.buttonText}>Sign Up</Text>
           </TouchableOpacity>
         </View>
@@ -31,6 +40,7 @@ export default Welcome
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f8f9fa', // Fallback background color
   },
   backgroundImage: {
     position: 'absolute',
@@ -94,4 +104,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     letterSpacing: 1,
   },
-})
+});

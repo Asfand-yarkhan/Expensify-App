@@ -6,9 +6,13 @@ import {
   TouchableOpacity,
   Image,
   FlatList,
+  Alert,
 } from 'react-native';
 import Emptylist from '../components/Emptylist';
 import {useNavigation} from '@react-navigation/native';
+import {useDispatch} from 'react-redux';
+import {logout} from '../store/slices/authSlice';
+import auth from '@react-native-firebase/auth';
 
 const items = [
   {id: '1', place: 'Gujrat', country: 'Pakistan'},
@@ -21,11 +25,23 @@ const items = [
 
 const HomeScreen = () => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+
+  const handleLogout = async () => {
+    try {
+      await auth().signOut();
+      dispatch(logout());
+      // Navigation will be handled automatically by the App.js conditional rendering
+    } catch (error) {
+      Alert.alert('Error', 'Failed to logout. Please try again.');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.heading}>Expensify</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleLogout}>
           <Text style={styles.buttonText}>Logout</Text>
         </TouchableOpacity>
       </View>
@@ -45,33 +61,20 @@ const HomeScreen = () => {
       </View>
 
       <FlatList
-        contentContainerStyle={styles.listContent}
         data={items}
-        numColumns={2}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <Emptylist message={'You have recorded no Trip yet'} />
-        }
-        columnWrapperStyle={{justifyContent: 'space-between'}}
-        keyExtractor={item => item.id}
         renderItem={({item}) => (
           <TouchableOpacity
             style={styles.tripCard}
-            onPress={() =>
-              navigation.navigate('TripExpenseScreen', {
-                id: item.id,
-                place: item.place,
-                country: item.country,
-              })
-            }>
-            <Image
-              source={require('../assets/travel.jpeg')}
-              style={styles.cardImage}
-            />
+            onPress={() => navigation.navigate('TripExpenseScreen', {item})}>
+            <Image source={require('../assets/trip.jpg')} style={styles.cardImage} />
             <Text style={styles.placeText}>{item.place}</Text>
             <Text style={styles.countryText}>{item.country}</Text>
           </TouchableOpacity>
         )}
+        keyExtractor={item => item.id}
+        numColumns={2}
+        contentContainerStyle={styles.listContent}
+        ListEmptyComponent={<Emptylist />}
       />
     </View>
   );

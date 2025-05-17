@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "242243923510",
+    "project_id": "expensify-app11",
+    "storage_bucket": "expensify-app11.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:242243923510:android:b5ed130757b2f06d3db297",
+        "android_client_info": {
+          "package_name": "com.expensifyapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDs0aXTvu-ADiXLY8dOEiz0FrJhsmfeLeY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

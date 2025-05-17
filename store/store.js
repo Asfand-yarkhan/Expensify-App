@@ -1,12 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
-import tripReducer from './slices/tripSlice';
-import expenseReducer from './slices/expenseSlice';
+import expenseReducer from './expenseReducer';
 import authReducer from './slices/authSlice';
 
-export const store = configureStore({
+const store = configureStore({
   reducer: {
-    trips: tripReducer,
-    expenses: expenseReducer,
     auth: authReducer,
+    expenses: expenseReducer,
   },
-}); 
+});
+
+export default store; 

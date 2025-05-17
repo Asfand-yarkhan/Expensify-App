@@ -6,20 +6,80 @@ import {
   Image,
   TouchableOpacity,
   TextInput,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useState} from 'react';
 import Backbutton from '../components/Backbutton';
 import {useNavigation} from '@react-navigation/native';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+import {useDispatch} from 'react-redux';
+import {login} from '../store/slices/authSlice';
 
 const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [cnic, setCnic] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
-  const handleSignUp = () => {
-    if (email && password && confirmPassword) {
-      navigation.navigate('HomeScreen');
+  const handleSignUp = async () => {
+    if (email && password && confirmPassword && cnic && phoneNumber) {
+      if (password !== confirmPassword) {
+        Alert.alert('Error', 'Passwords do not match!');
+        return;
+      }
+      if (cnic.length !== 13) {
+        Alert.alert('Error', 'CNIC must be 13 digits!');
+        return;
+      }
+      if (phoneNumber.length !== 11) {
+        Alert.alert('Error', 'Phone number must be 11 digits!');
+        return;
+      }
+
+      try {
+        setLoading(true);
+        // Create user with email and password
+        const userCredential = await auth().createUserWithEmailAndPassword(email, password);
+        
+        // Add additional user data to Firestore
+        await firestore().collection('users').doc(userCredential.user.uid).set({
+          email: email,
+          cnic: cnic,
+          phoneNumber: phoneNumber,
+          createdAt: firestore.FieldValue.serverTimestamp(),
+        });
+
+        // Update Redux state
+        dispatch(login({
+          uid: userCredential.user.uid,
+          email: email,
+          cnic: cnic,
+          phoneNumber: phoneNumber,
+        }));
+
+        Alert.alert('Success', 'Account created successfully!');
+        // Navigation will be handled automatically by the App.js conditional rendering
+      } catch (error) {
+        let errorMessage = 'An error occurred during sign up';
+        if (error.code === 'auth/email-already-in-use') {
+          errorMessage = 'This email is already registered';
+        } else if (error.code === 'auth/invalid-email') {
+          errorMessage = 'Invalid email address';
+        } else if (error.code === 'auth/weak-password') {
+          errorMessage = 'Password is too weak';
+        }
+        Alert.alert('Error', errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      Alert.alert('Error', 'Please fill in all the required fields!');
     }
   };
 
@@ -48,6 +108,32 @@ const SignUp = () => {
             placeholder="Enter your email"
             placeholderTextColor="#666"
             autoCapitalize="none"
+            keyboardType="email-address"
+            editable={!loading}
+          />
+
+          <Text style={styles.label}>CNIC Number</Text>
+          <TextInput
+            value={cnic}
+            onChangeText={value => setCnic(value)}
+            style={styles.input}
+            placeholder="Enter your CNIC (13 digits)"
+            placeholderTextColor="#666"
+            keyboardType="numeric"
+            maxLength={13}
+            editable={!loading}
+          />
+
+          <Text style={styles.label}>Phone Number</Text>
+          <TextInput
+            value={phoneNumber}
+            onChangeText={value => setPhoneNumber(value)}
+            style={styles.input}
+            placeholder="Enter your phone number (11 digits)"
+            placeholderTextColor="#666"
+            keyboardType="phone-pad"
+            maxLength={11}
+            editable={!loading}
           />
 
           <Text style={styles.label}>Password</Text>
@@ -59,6 +145,7 @@ const SignUp = () => {
             placeholderTextColor="#666"
             secureTextEntry
             autoCapitalize="none"
+            editable={!loading}
           />
 
           <Text style={styles.label}>Confirm Password</Text>
@@ -70,11 +157,20 @@ const SignUp = () => {
             placeholderTextColor="#666"
             secureTextEntry
             autoCapitalize="none"
+            editable={!loading}
           />
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleSignUp}>
-          <Text style={styles.buttonText}>Sign Up</Text>
+        <TouchableOpacity 
+          style={[styles.button, loading && styles.buttonDisabled]} 
+          onPress={handleSignUp}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#ffffff" />
+          ) : (
+            <Text style={styles.buttonText}>Sign Up</Text>
+          )}
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -146,6 +242,9 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     alignItems: 'center',
     marginTop: 10,
+  },
+  buttonDisabled: {
+    backgroundColor: '#9fa8da',
   },
   buttonText: {
     color: '#ffffff',
