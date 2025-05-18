@@ -5,84 +5,147 @@ import {
     SafeAreaView,
     Image,
     TouchableOpacity,
+    KeyboardAvoidingView,
+    ScrollView,
+    Platform,
+    Alert,
+    ActivityIndicator,
   } from 'react-native';
   import React, {useState} from 'react';
   import Backbutton from '../components/Backbutton';
   import {TextInput} from 'react-native';
-  import {useNavigation} from '@react-navigation/native';
+  import {useNavigation, useRoute} from '@react-navigation/native';
   import { categories } from '../constants';
+  import firestore from '@react-native-firebase/firestore';
+  import {useSelector} from 'react-redux';
   
   const AddExpense = () => {
     const [title, settitle] = useState('');
     const [amount, setamount] = useState('');
     const [category, setcategory] = useState('');
-
+    const [loading, setLoading] = useState(false);
   
     const navigation = useNavigation();
+    const route = useRoute();
+    const {tripId} = route.params;
+    const user = useSelector(state => state.auth.user);
   
-    const handleAddExpense = () => {
-      if (title && amount && category) {
-        navigation.goBack();
-      } else {
-        //error message
+    const handleAddExpense = async () => {
+      if (!title || !amount || !category) {
+        Alert.alert('Error', 'Please fill in all fields and select a category');
+        return;
+      }
+
+      if (isNaN(amount) || parseFloat(amount) <= 0) {
+        Alert.alert('Error', 'Please enter a valid amount');
+        return;
+      }
+  
+      try {
+        setLoading(true);
+        const expenseData = {
+          title,
+          amount: parseFloat(amount),
+          category,
+          tripId,
+          userId: user.uid,
+          createdAt: firestore.FieldValue.serverTimestamp(),
+        };
+
+        await firestore().collection('expenses').add(expenseData);
+        Alert.alert('Success', 'Expense added successfully!', [
+          {
+            text: 'OK',
+            onPress: () => navigation.goBack()
+          }
+        ]);
+      } catch (error) {
+        Alert.alert('Error', 'Failed to add expense. Please try again.');
+      } finally {
+        setLoading(false);
       }
     };
   
     return (
-      <SafeAreaView style={styles.container1}>
-        <View style={styles.header}>
-          <Backbutton />
-        </View>
-  
-        <View style={{justifyContent: 'center', alignItems: 'center'}}>
-          <Text style={styles.heading}>Add Expense</Text>
-        </View>
-  
-        <View style={{justifyContent: 'center', alignItems: 'center'}}>
-          <Image style={styles.Image} source={require('../assets/trip.jpg')} />
-        </View>
-  
-        <View>
-          <Text style={styles.Text}>For what ?(items):</Text>
-          <TextInput
-            value={title}
-            onChangeText={value => settitle(value)}
-            style={styles.Input}
-          />
-          <Text style={styles.Text}>How Much?$:</Text>
-          <TextInput
-            value={amount}
-            onChangeText={value => setamount(value)}
-            style={styles.Input}
-          />
-        </View>
-
-        <View>
-          <Text style={styles.Text}>Select Category:</Text>
-          <View style={styles.categoriesContainer}>
-            {categories.map((cat, index) => (
-              <TouchableOpacity
-                style={[
-                  styles.categoryBubble,
-                  category === cat.title && styles.selectedCategory,
-                ]}
-                onPress={() => setcategory(cat.title)}
-                key={cat.title}>
-                <Text style={[
-                  styles.categoryText,
-                  category === cat.title && styles.selectedCategoryText
-                ]}>{cat.title}</Text>
-              </TouchableOpacity>
-            ))}
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container1}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.header}>
+            <Backbutton />
           </View>
-        </View>
   
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={() => handleAddExpense()}>
-            <Text style={styles.buttonText}>Add Expense</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
+          <View style={{justifyContent: 'center', alignItems: 'center'}}>
+            <Text style={styles.heading}>Add Expense</Text>
+          </View>
+  
+          <View style={{justifyContent: 'center', alignItems: 'center'}}>
+            <Image style={styles.Image} source={require('../assets/trip.jpg')} />
+          </View>
+  
+          <View>
+            <Text style={styles.Text}>For what ?(items):</Text>
+            <TextInput
+              value={title}
+              onChangeText={value => settitle(value)}
+              style={styles.Input}
+              placeholder="Enter expense title"
+              placeholderTextColor="#666"
+              editable={!loading}
+            />
+            <Text style={styles.Text}>How Much?$:</Text>
+            <TextInput
+              value={amount}
+              onChangeText={value => setamount(value)}
+              style={styles.Input}
+              placeholder="Enter amount"
+              placeholderTextColor="#666"
+              keyboardType="numeric"
+              editable={!loading}
+            />
+          </View>
+
+          <View>
+            <Text style={styles.Text}>Select Category:</Text>
+            <View style={styles.categoriesContainer}>
+              {categories.map((cat, index) => (
+                <TouchableOpacity
+                  style={[
+                    styles.categoryBubble,
+                    category === cat.title && styles.selectedCategory,
+                  ]}
+                  onPress={() => setcategory(cat.title)}
+                  key={cat.title}
+                  disabled={loading}>
+                  <Text style={[
+                    styles.categoryText,
+                    category === cat.title && styles.selectedCategoryText
+                  ]}>{cat.title}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+  
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity 
+              style={[styles.button, loading && styles.buttonDisabled]} 
+              onPress={handleAddExpense}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#ffffff" />
+              ) : (
+                <Text style={styles.buttonText}>Add Expense</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     );
   };
   
@@ -91,9 +154,13 @@ import {
   const styles = StyleSheet.create({
     container1: {
       flex: 1,
+      backgroundColor: '#f8f9fa',
+    },
+    scrollContent: {
+      flexGrow: 1,
       paddingTop: 20,
       paddingHorizontal: 20,
-      backgroundColor: '#f8f9fa',
+      paddingBottom: 40,
     },
     header: {
       flexDirection: 'row',
@@ -178,6 +245,9 @@ import {
     selectedCategoryText: {
       color: '#ffffff',
       fontWeight: '600',
+    },
+    buttonDisabled: {
+      backgroundColor: '#9fa8da',
     },
   });
   

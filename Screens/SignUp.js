@@ -2,12 +2,14 @@ import {
   StyleSheet,
   Text,
   View,
-  SafeAreaView,
   Image,
   TouchableOpacity,
   TextInput,
   Alert,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
 } from 'react-native';
 import React, {useState} from 'react';
 import Backbutton from '../components/Backbutton';
@@ -84,96 +86,105 @@ const SignUp = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Backbutton />
-      </View>
-
-      <View style={styles.contentContainer}>
-        <Text style={styles.heading}>Create Account</Text>
-        
-        <View style={styles.imageContainer}>
-          <Image
-            source={require('../assets/signin.jpg')}
-            style={styles.image}
-          />
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.header}>
+          <Backbutton />
         </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            value={email}
-            onChangeText={value => setEmail(value)}
-            style={styles.input}
-            placeholder="Enter your email"
-            placeholderTextColor="#666"
-            autoCapitalize="none"
-            keyboardType="email-address"
-            editable={!loading}
-          />
+        <View style={styles.contentContainer}>
+          <Text style={styles.heading}>Create Account</Text>
+          
+          <View style={styles.imageContainer}>
+            <Image
+              source={require('../assets/signin.jpg')}
+              style={styles.image}
+            />
+          </View>
 
-          <Text style={styles.label}>CNIC Number</Text>
-          <TextInput
-            value={cnic}
-            onChangeText={value => setCnic(value)}
-            style={styles.input}
-            placeholder="Enter your CNIC (13 digits)"
-            placeholderTextColor="#666"
-            keyboardType="numeric"
-            maxLength={13}
-            editable={!loading}
-          />
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              value={email}
+              onChangeText={value => setEmail(value)}
+              style={styles.input}
+              placeholder="Enter your email"
+              placeholderTextColor="#666"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              editable={!loading}
+            />
 
-          <Text style={styles.label}>Phone Number</Text>
-          <TextInput
-            value={phoneNumber}
-            onChangeText={value => setPhoneNumber(value)}
-            style={styles.input}
-            placeholder="Enter your phone number (11 digits)"
-            placeholderTextColor="#666"
-            keyboardType="phone-pad"
-            maxLength={11}
-            editable={!loading}
-          />
+            <Text style={styles.label}>CNIC Number</Text>
+            <TextInput
+              value={cnic}
+              onChangeText={value => setCnic(value)}
+              style={styles.input}
+              placeholder="Enter your CNIC (13 digits)"
+              placeholderTextColor="#666"
+              keyboardType="numeric"
+              maxLength={13}
+              editable={!loading}
+            />
 
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            value={password}
-            onChangeText={value => setPassword(value)}
-            style={styles.input}
-            placeholder="Enter your password"
-            placeholderTextColor="#666"
-            secureTextEntry
-            autoCapitalize="none"
-            editable={!loading}
-          />
+            <Text style={styles.label}>Phone Number</Text>
+            <TextInput
+              value={phoneNumber}
+              onChangeText={value => setPhoneNumber(value)}
+              style={styles.input}
+              placeholder="Enter your phone number (11 digits)"
+              placeholderTextColor="#666"
+              keyboardType="phone-pad"
+              maxLength={11}
+              editable={!loading}
+            />
 
-          <Text style={styles.label}>Confirm Password</Text>
-          <TextInput
-            value={confirmPassword}
-            onChangeText={value => setConfirmPassword(value)}
-            style={styles.input}
-            placeholder="Confirm your password"
-            placeholderTextColor="#666"
-            secureTextEntry
-            autoCapitalize="none"
-            editable={!loading}
-          />
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+              value={password}
+              onChangeText={value => setPassword(value)}
+              style={styles.input}
+              placeholder="Enter your password"
+              placeholderTextColor="#666"
+              secureTextEntry
+              autoCapitalize="none"
+              editable={!loading}
+            />
+
+            <Text style={styles.label}>Confirm Password</Text>
+            <TextInput
+              value={confirmPassword}
+              onChangeText={value => setConfirmPassword(value)}
+              style={styles.input}
+              placeholder="Confirm your password"
+              placeholderTextColor="#666"
+              secureTextEntry
+              autoCapitalize="none"
+              editable={!loading}
+            />
+          </View>
+
+          <TouchableOpacity 
+            style={[styles.button, loading && styles.buttonDisabled]} 
+            onPress={handleSignUp}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#ffffff" />
+            ) : (
+              <Text style={styles.buttonText}>Sign Up</Text>
+            )}
+          </TouchableOpacity>
         </View>
-
-        <TouchableOpacity 
-          style={[styles.button, loading && styles.buttonDisabled]} 
-          onPress={handleSignUp}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#ffffff" />
-          ) : (
-            <Text style={styles.buttonText}>Sign Up</Text>
-          )}
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -183,6 +194,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   header: {
     flexDirection: 'row',
@@ -194,6 +208,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 20,
+    paddingBottom: 40, // Add padding at bottom for better scrolling
   },
   heading: {
     fontSize: 32,

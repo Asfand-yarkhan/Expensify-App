@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -7,38 +7,125 @@ import {
   Image,
   FlatList,
   Alert,
+  ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import Emptylist from '../components/Emptylist';
-import {useNavigation} from '@react-navigation/native';
-import {useDispatch} from 'react-redux';
+import {useNavigation, useFocusEffect} from '@react-navigation/native';
+import {useDispatch, useSelector} from 'react-redux';
 import {logout} from '../store/slices/authSlice';
 import auth from '@react-native-firebase/auth';
-
-const items = [
-  {id: '1', place: 'Gujrat', country: 'Pakistan'},
-  {id: '2', place: 'London Eye', country: 'England'},
-  {id: '3', place: 'Washington DC', country: 'America'},
-  {id: '4', place: 'New York', country: 'America'},
-  {id: '5', place: 'Thailand', country: 'America'},
-  {id: '6', place: 'Hungry', country: 'Europe'},
-];
+import firestore from '@react-native-firebase/firestore';
 
 const HomeScreen = () => {
+  const [trips, setTrips] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const user = useSelector(state => state.auth.user);
+
+  const fetchTrips = async () => {
+    try {
+      setLoading(true);
+      const tripsSnapshot = await firestore()
+        .collection('trips')
+        .where('userId', '==', user.uid)
+        .orderBy('createdAt', 'desc')
+        .get();
+
+      const tripsData = tripsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setTrips(tripsData);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to load trips');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Refresh trips when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchTrips();
+    }, [user.uid])
+  );
 
   const handleLogout = async () => {
     try {
       await auth().signOut();
       dispatch(logout());
-      // Navigation will be handled automatically by the App.js conditional rendering
     } catch (error) {
       Alert.alert('Error', 'Failed to logout. Please try again.');
     }
   };
 
+  const renderTripCard = ({item}) => (
+    <TouchableOpacity
+      style={styles.tripCard}
+      onPress={() => navigation.navigate('TripExpenseScreen', {
+        id: item.id,
+        place: item.place,
+        country: item.country,
+      })}>
+      <TouchableOpacity 
+        style={styles.deleteButton}
+        onPress={() => {
+          Alert.alert(
+            'Delete Trip',
+            'Are you sure you want to delete this trip?',
+            [
+              {
+                text: 'Cancel',
+                style: 'cancel',
+              },
+              {
+                text: 'Delete',
+                style: 'destructive',
+                onPress: async () => {
+                  try {
+                    // Delete all expenses associated with this trip first
+                    const expensesSnapshot = await firestore()
+                      .collection('expenses')
+                      .where('tripId', '==', item.id)
+                      .get();
+                    
+                    const deletePromises = expensesSnapshot.docs.map(doc => 
+                      doc.ref.delete()
+                    );
+                    await Promise.all(deletePromises);
+
+                    // Then delete the trip
+                    await firestore()
+                      .collection('trips')
+                      .doc(item.id)
+                      .delete();
+                    
+                    // Refresh the trips list
+                    fetchTrips();
+                  } catch (error) {
+                    Alert.alert('Error', 'Failed to delete trip');
+                  }
+                },
+              },
+            ],
+          );
+        }}>
+        <Text style={styles.deleteButtonText}>×</Text>
+      </TouchableOpacity>
+      <Image source={require('../assets/trip.jpg')} style={styles.cardImage} />
+      <Text style={styles.placeText}>{item.place}</Text>
+      <Text style={styles.countryText}>{item.country}</Text>
+    </TouchableOpacity>
+  );
+
   return (
-    <View style={styles.container}>
+    <ScrollView 
+      style={styles.container}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.scrollContent}
+    >
       <View style={styles.header}>
         <Text style={styles.heading}>Expensify</Text>
         <TouchableOpacity onPress={handleLogout}>
@@ -55,28 +142,33 @@ const HomeScreen = () => {
 
       <View style={styles.tripsHeader}>
         <Text style={styles.heading2}>Recent Trips</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('AddTripScreen')}>
+        <TouchableOpacity 
+          style={styles.addButton}
+          onPress={() => navigation.navigate('AddTripScreen')}
+        >
           <Text style={styles.buttonText2}>Add Trip</Text>
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={items}
-        renderItem={({item}) => (
-          <TouchableOpacity
-            style={styles.tripCard}
-            onPress={() => navigation.navigate('TripExpenseScreen', {item})}>
-            <Image source={require('../assets/trip.jpg')} style={styles.cardImage} />
-            <Text style={styles.placeText}>{item.place}</Text>
-            <Text style={styles.countryText}>{item.country}</Text>
-          </TouchableOpacity>
-        )}
-        keyExtractor={item => item.id}
-        numColumns={2}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={<Emptylist />}
-      />
-    </View>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#3949ab" />
+        </View>
+      ) : (
+        <FlatList
+          data={trips}
+          renderItem={renderTripCard}
+          keyExtractor={item => item.id}
+          numColumns={2}
+          columnWrapperStyle={styles.row}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={
+            <Emptylist message="No trips added yet. Add your first trip!" />
+          }
+          scrollEnabled={false}
+        />
+      )}
+    </ScrollView>
   );
 };
 
@@ -84,8 +176,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
+  },
+  scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 25,
+    paddingBottom: 40,
   },
   header: {
     flexDirection: 'row',
@@ -145,17 +240,28 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#1a237e',
   },
+  addButton: {
+    backgroundColor: '#3949ab',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
   buttonText2: {
     fontSize: 14,
     fontWeight: '600',
     color: '#ffffff',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    backgroundColor: '#3949ab',
   },
   listContent: {
     paddingBottom: 30,
+    gap: 15,
   },
   tripCard: {
     backgroundColor: '#ffffff',
@@ -191,6 +297,42 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     fontWeight: '500',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 50,
+  },
+  deleteButton: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#ff5252',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  deleteButtonText: {
+    color: '#ffffff',
+    fontSize: 24,
+    fontWeight: 'bold',
+    lineHeight: 24,
+  },
+  row: {
+    justifyContent: 'space-between',
+    paddingHorizontal: 5,
   },
 });
 

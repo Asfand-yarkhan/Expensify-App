@@ -2,64 +2,112 @@ import {
   StyleSheet,
   Text,
   View,
-  SafeAreaView,
   Image,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
+  Alert,
 } from 'react-native';
 import React, {useState} from 'react';
 import Backbutton from '../components/Backbutton';
 import {TextInput} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import firestore from '@react-native-firebase/firestore';
+import {useSelector} from 'react-redux';
 
 const AddTripScreen = () => {
   const [place, setplace] = useState('');
   const [country, setcountry] = useState('');
-
+  const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
+  const user = useSelector(state => state.auth.user);
 
-  const handleAddTrip = () => {
-    if (place && country) {
-      navigation.navigate('HomeScreen');
-    } else {
-      //error message
+  const handleAddTrip = async () => {
+    if (!place || !country) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const tripData = {
+        place,
+        country,
+        userId: user.uid,
+        createdAt: firestore.FieldValue.serverTimestamp(),
+      };
+
+      await firestore().collection('trips').add(tripData);
+      Alert.alert('Success', 'Trip added successfully!', [
+        {
+          text: 'OK',
+          onPress: () => navigation.goBack()
+        }
+      ]);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to add trip. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.container1}>
-      <View style={styles.header}>
-        <Backbutton />
-      </View>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container1}
+    >
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.header}>
+          <Backbutton />
+        </View>
 
-      <View style={{justifyContent: 'center', alignItems: 'center'}}>
-        <Text style={styles.heading}>Add Trip</Text>
-      </View>
+        <View style={{justifyContent: 'center', alignItems: 'center'}}>
+          <Text style={styles.heading}>Add Trip</Text>
+        </View>
 
-      <View style={{justifyContent: 'center', alignItems: 'center'}}>
-        <Image style={styles.Image} source={require('../assets/empty.jpg')} />
-      </View>
+        <View style={{justifyContent: 'center', alignItems: 'center'}}>
+          <Image style={styles.Image} source={require('../assets/empty.jpg')} />
+        </View>
 
-      <View>
-        <Text style={styles.Text}>Where on Earth?</Text>
-        <TextInput
-          value={place}
-          onChangeText={value => setplace(value)}
-          style={styles.Input}
-        />
-        <Text style={styles.Text}>Which Country:</Text>
-        <TextInput
-          value={country}
-          onChangeText={value => setcountry(value)}
-          style={styles.Input}
-        />
-      </View>
+        <View>
+          <Text style={styles.Text}>Where on Earth?</Text>
+          <TextInput
+            value={place}
+            onChangeText={value => setplace(value)}
+            style={styles.Input}
+            placeholder="Enter place name"
+            placeholderTextColor="#666"
+            editable={!loading}
+          />
+          <Text style={styles.Text}>Which Country:</Text>
+          <TextInput
+            value={country}
+            onChangeText={value => setcountry(value)}
+            style={styles.Input}
+            placeholder="Enter country name"
+            placeholderTextColor="#666"
+            editable={!loading}
+          />
+        </View>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => handleAddTrip()}>
-          <Text style={styles.buttonText}>Add Trip</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity 
+            style={[styles.button, loading && styles.buttonDisabled]} 
+            onPress={handleAddTrip}
+            disabled={loading}
+          >
+            <Text style={styles.buttonText}>
+              {loading ? 'Adding...' : 'Add Trip'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -68,9 +116,13 @@ export default AddTripScreen;
 const styles = StyleSheet.create({
   container1: {
     flex: 1,
+    backgroundColor: '#f8f9fa',
+  },
+  scrollContent: {
+    flexGrow: 1,
     paddingTop: 20,
     paddingHorizontal: 20,
-    backgroundColor: '#f8f9fa',
+    paddingBottom: 40,
   },
   header: {
     flexDirection: 'row',
@@ -127,5 +179,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#ffffff',
     letterSpacing: 1,
+  },
+  buttonDisabled: {
+    backgroundColor: '#9fa8da',
   },
 });

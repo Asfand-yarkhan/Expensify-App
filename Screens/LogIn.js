@@ -2,11 +2,13 @@ import {
   StyleSheet,
   Text,
   View,
-  SafeAreaView,
   Image,
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
 } from 'react-native';
 import React, {useState} from 'react';
 import Backbutton from '../components/Backbutton';
@@ -74,64 +76,73 @@ const LogIn = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container1}>
-      <View style={styles.header}>
-        <Backbutton />
-      </View>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container1}
+    >
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.header}>
+          <Backbutton />
+        </View>
 
-      <View style={{justifyContent: 'center', alignItems: 'center'}}>
-        <Text style={styles.heading}>Sign In</Text>
-      </View>
+        <View style={{justifyContent: 'center', alignItems: 'center'}}>
+          <Text style={styles.heading}>Sign In</Text>
+        </View>
 
-      <View style={{justifyContent: 'center', alignItems: 'center'}}>
-        <Image style={styles.Image} source={require('../assets/signin.jpg')} />
-      </View>
+        <View style={{justifyContent: 'center', alignItems: 'center'}}>
+          <Image style={styles.Image} source={require('../assets/signin.jpg')} />
+        </View>
 
-      <View>
-        <Text style={styles.Text}>Email : </Text>
-        <TextInput
-          value={email}
-          onChangeText={value => setemail(value)}
-          placeholder="Enter your email"
-          placeholderTextColor="#666"
-          style={styles.Input}
-          editable={!loading}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-        <Text style={styles.Text}>Password :</Text>
-        <TextInput
-          value={Password}
-          onChangeText={value => setPassword(value)}
-          style={styles.Input}
-          secureTextEntry={true}
-          placeholder="Enter your password"
-          placeholderTextColor="#666"
-          autoCapitalize="none"
-          autoCorrect={false}
-          editable={!loading}
-        />
-      </View>
-      <View style={styles.forgetContainer}>
-        <TouchableOpacity onPress={() => navigation.navigate('ForgetPassword')}>
-          <Text style={styles.forgetText}>Forget Password?</Text>
-        </TouchableOpacity>
-      </View>
+        <View>
+          <Text style={styles.Text}>Email : </Text>
+          <TextInput
+            value={email}
+            onChangeText={value => setemail(value)}
+            placeholder="Enter your email"
+            placeholderTextColor="#666"
+            style={styles.Input}
+            editable={!loading}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          <Text style={styles.Text}>Password :</Text>
+          <TextInput
+            value={Password}
+            onChangeText={value => setPassword(value)}
+            style={styles.Input}
+            secureTextEntry={true}
+            placeholder="Enter your password"
+            placeholderTextColor="#666"
+            autoCapitalize="none"
+            autoCorrect={false}
+            editable={!loading}
+          />
+        </View>
+        <View style={styles.forgetContainer}>
+          <TouchableOpacity onPress={() => navigation.navigate('ForgetPassword')}>
+            <Text style={styles.forgetText}>Forget Password?</Text>
+          </TouchableOpacity>
+        </View>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity 
-          style={[styles.button, loading && styles.buttonDisabled]} 
-          onPress={handleSignin}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#ffffff" />
-          ) : (
-            <Text style={styles.buttonText}>Sign In</Text>
-          )}
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity 
+            style={[styles.button, loading && styles.buttonDisabled]} 
+            onPress={handleSignin}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#ffffff" />
+            ) : (
+              <Text style={styles.buttonText}>Sign In</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -140,9 +151,13 @@ export default LogIn;
 const styles = StyleSheet.create({
   container1: {
     flex: 1,
+    backgroundColor: '#f8f9fa',
+  },
+  scrollContent: {
+    flexGrow: 1,
     paddingTop: 20,
     paddingHorizontal: 20,
-    backgroundColor: '#f8f9fa',
+    paddingBottom: 40,
   },
   header: {
     flexDirection: 'row',

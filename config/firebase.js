@@ -5,17 +5,22 @@ import { initializeApp } from '@react-native-firebase/app';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDR50mgVPUmrUX-zEk1z10obwvrIrMymXw",
+  apiKey: "AIzaSyDs0aXTvu-ADiXLY8dOEiz0FrJhsmfeLeY",
   authDomain: "expensify-app11.firebaseapp.com",
   projectId: "expensify-app11",
   storageBucket: "expensify-app11.firebasestorage.app",
   messagingSenderId: "242243923510",
-  appId: "1:242243923510:web:be1e39793f6764773db297"
+  appId: "1:242243923510:android:b5ed130757b2f06d3db297"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
+// Initialize services
+const firestoreInstance = firestore();
+const authInstance = auth();
+const storageInstance = storage();
+
 // Export Firebase services
-export { auth, firestore, storage };
+export { authInstance as auth, firestoreInstance as firestore, storageInstance as storage };
 export default app; 
